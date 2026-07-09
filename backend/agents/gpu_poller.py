@@ -34,10 +34,14 @@ def poll_amd() -> dict:
     import json
     data = json.loads(out)
     card = next(iter(data.values()))
+    # Key names verified against a real MI300X droplet's rocm-smi (ROCm 7.2.4) output;
+    # older/newer ROCm versions may use "Average Graphics Package Power (W)" instead.
+    power = card.get("Current Socket Graphics Package Power (W)") or card.get("Average Graphics Package Power (W)", 0)
+    temp = card.get("Temperature (Sensor junction) (C)") or card.get("Temperature (Sensor edge) (C)", 0)
     return {
-        "power_w": float(card.get("Average Graphics Package Power (W)", 0)),
+        "power_w": float(power),
         "util_pct": float(card.get("GPU use (%)", 0)),
-        "temp_c": float(card.get("Temperature (Sensor edge) (C)", 0)),
+        "temp_c": float(temp),
     }
 
 
