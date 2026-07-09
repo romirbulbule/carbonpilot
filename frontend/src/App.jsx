@@ -7,6 +7,7 @@ import AgentTrace from './components/AgentTrace'
 import RegionTable from './components/RegionTable'
 import LiveTicker from './components/LiveTicker'
 import Sparkline from './components/Sparkline'
+import CarbonMap from './components/CarbonMap'
 
 function extractResult(trace) {
   const call = [...trace].reverse().find((s) => s.type === 'tool_call' && s.name === 'calculate_footprint')
@@ -74,6 +75,15 @@ function App() {
 
       <div className="mb-6">
         <StatTiles result={result} />
+      </div>
+
+      <div className="mb-6">
+        <CarbonMap
+          regions={regions}
+          selectedRegion={region}
+          onSelectRegion={setRegion}
+          liveIntensity={carbonIntensity}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -1,9 +1,4 @@
-function level(g) {
-  if (g < 60) return { label: 'Best', color: 'text-emerald-400' }
-  if (g < 150) return { label: 'Low', color: 'text-lime-400' }
-  if (g < 250) return { label: 'Med', color: 'text-amber-400' }
-  return { label: 'High', color: 'text-rose-400' }
-}
+import { carbonLevel } from '../lib/carbonLevel'
 
 export default function RegionTable({ regions }) {
   return (
@@ -19,7 +14,7 @@ export default function RegionTable({ regions }) {
         </thead>
         <tbody>
           {regions.map((r) => {
-            const lvl = level(r.carbon_intensity_g)
+            const lvl = carbonLevel(r.carbon_intensity_g)
             return (
               <tr key={r.region} className="border-t border-slate-800/60">
                 <td className="py-1.5">{r.label}</td>

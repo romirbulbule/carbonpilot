@@ -1,12 +1,12 @@
 {
-  "norway": { "label": "Norway", "electricitymaps_zone": "NO", "carbon_intensity_g": 26, "pue": 1.1, "wue_l_per_kwh": 0.2 },
-  "iceland": { "label": "Iceland", "electricitymaps_zone": "IS", "carbon_intensity_g": 28, "pue": 1.1, "wue_l_per_kwh": 0.2 },
-  "sweden": { "label": "Sweden", "electricitymaps_zone": "SE", "carbon_intensity_g": 45, "pue": 1.15, "wue_l_per_kwh": 0.3 },
-  "france": { "label": "France", "electricitymaps_zone": "FR", "carbon_intensity_g": 85, "pue": 1.2, "wue_l_per_kwh": 0.4 },
-  "washington": { "label": "Washington, US", "electricitymaps_zone": "US-NW-PACW", "carbon_intensity_g": 118, "pue": 1.2, "wue_l_per_kwh": 0.5 },
-  "canada": { "label": "Canada", "electricitymaps_zone": "CA", "carbon_intensity_g": 150, "pue": 1.2, "wue_l_per_kwh": 0.5 },
-  "oregon": { "label": "Oregon, US", "electricitymaps_zone": "US-NW-PACW", "carbon_intensity_g": 185, "pue": 1.25, "wue_l_per_kwh": 0.6 },
-  "california": { "label": "California, US", "electricitymaps_zone": "US-CAL-CISO", "carbon_intensity_g": 218, "pue": 1.3, "wue_l_per_kwh": 0.7 },
-  "virginia": { "label": "Virginia, US", "electricitymaps_zone": "US-MIDA-PJM", "carbon_intensity_g": 320, "pue": 1.4, "wue_l_per_kwh": 1.8 },
-  "texas": { "label": "Texas, US", "electricitymaps_zone": "US-TEX-ERCO", "carbon_intensity_g": 380, "pue": 1.3, "wue_l_per_kwh": 1.0 }
+  "norway": { "label": "Norway", "electricitymaps_zone": "NO", "carbon_intensity_g": 26, "pue": 1.1, "wue_l_per_kwh": 0.2, "lat": 60.47, "lng": 8.47 },
+  "iceland": { "label": "Iceland", "electricitymaps_zone": "IS", "carbon_intensity_g": 28, "pue": 1.1, "wue_l_per_kwh": 0.2, "lat": 64.96, "lng": -19.02 },
+  "sweden": { "label": "Sweden", "electricitymaps_zone": "SE", "carbon_intensity_g": 45, "pue": 1.15, "wue_l_per_kwh": 0.3, "lat": 60.13, "lng": 18.64 },
+  "france": { "label": "France", "electricitymaps_zone": "FR", "carbon_intensity_g": 85, "pue": 1.2, "wue_l_per_kwh": 0.4, "lat": 46.23, "lng": 2.21 },
+  "washington": { "label": "Washington, US", "electricitymaps_zone": "US-NW-PACW", "carbon_intensity_g": 118, "pue": 1.2, "wue_l_per_kwh": 0.5, "lat": 47.75, "lng": -120.74 },
+  "canada": { "label": "Canada", "electricitymaps_zone": "CA", "carbon_intensity_g": 150, "pue": 1.2, "wue_l_per_kwh": 0.5, "lat": 56.13, "lng": -106.35 },
+  "oregon": { "label": "Oregon, US", "electricitymaps_zone": "US-NW-PACW", "carbon_intensity_g": 185, "pue": 1.25, "wue_l_per_kwh": 0.6, "lat": 43.80, "lng": -120.55 },
+  "california": { "label": "California, US", "electricitymaps_zone": "US-CAL-CISO", "carbon_intensity_g": 218, "pue": 1.3, "wue_l_per_kwh": 0.7, "lat": 36.78, "lng": -119.42 },
+  "virginia": { "label": "Virginia, US", "electricitymaps_zone": "US-MIDA-PJM", "carbon_intensity_g": 320, "pue": 1.4, "wue_l_per_kwh": 1.8, "lat": 37.43, "lng": -78.66 },
+  "texas": { "label": "Texas, US", "electricitymaps_zone": "US-TEX-ERCO", "carbon_intensity_g": 380, "pue": 1.3, "wue_l_per_kwh": 1.0, "lat": 31.97, "lng": -99.90 }
 }
