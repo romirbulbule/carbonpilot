@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: carbonpilot-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: FIREWORKS_API_KEY
+        sync: false
+      - key: FIREWORKS_MODEL
+        value: accounts/fireworks/models/gpt-oss-120b
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ELECTRICITYMAPS_API_KEY
+        sync: false
+      - key: INGEST_SHARED_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: http://localhost:5173
