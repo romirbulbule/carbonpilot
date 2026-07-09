@@ -79,7 +79,7 @@ def _openai_tools() -> list[dict]:
 
 
 FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
-DEFAULT_FIREWORKS_MODEL = "accounts/fireworks/models/llama-v3p1-70b-instruct"
+DEFAULT_FIREWORKS_MODEL = "accounts/fireworks/models/gpt-oss-120b"
 
 
 def analyze_with_fireworks(workload_text: str) -> dict:
