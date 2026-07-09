@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CarbonPilot — AMD Developer Hackathon Act II, Track 3</title>
+<style>
+  @page {
+    size: 1280px 720px;
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e2e8f0;
+  }
+  section.slide {
+    width: 1280px;
+    height: 720px;
+    padding: 64px 72px;
+    background: #0f172a;
+    page-break-after: always;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  section.slide:last-child { page-break-after: avoid; }
+
+  .kicker {
+    color: #34d399;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 56px;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  h2 {
+    font-size: 38px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 28px;
+  }
+  .subtitle {
+    font-size: 24px;
+    color: #94a3b8;
+    max-width: 900px;
+    line-height: 1.5;
+  }
+  .body-text {
+    font-size: 20px;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-width: 980px;
+  }
+  .slide-number {
+    position: absolute;
+    bottom: 32px;
+    right: 40px;
+    color: #475569;
+    font-size: 14px;
+  }
+  .footer-brand {
+    position: absolute;
+    bottom: 32px;
+    left: 72px;
+    color: #475569;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  /* Title slide */
+  .title-slide {
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #052e2b 100%);
+  }
+  .title-slide .logo-mark {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #34d399;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 32px;
+  }
+  .title-slide h1 { font-size: 72px; }
+  .meta-row {
+    margin-top: 48px;
+    display: flex;
+    gap: 40px;
+    font-size: 18px;
+    color: #94a3b8;
+  }
+  .meta-row strong { color: #e2e8f0; }
+
+  /* Two column layout */
+  .cols {
+    display: flex;
+    gap: 48px;
+    flex: 1;
+    margin-top: 8px;
+  }
+  .col { flex: 1; }
+  .col h3 {
+    font-size: 20px;
+    color: #34d399;
+    margin-bottom: 12px;
+  }
+  .col p, .col li {
+    font-size: 17px;
+    color: #cbd5e1;
+    line-height: 1.55;
+  }
+  ul.plain { list-style: none; }
+  ul.plain li { margin-bottom: 10px; padding-left: 24px; position: relative; }
+  ul.plain li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+  }
+
+  /* Cards */
+  .card-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .card {
+    flex: 1;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .card .stat {
+    font-size: 40px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .card .stat-unit { font-size: 18px; color: #94a3b8; font-weight: 400; }
+  .card .stat-label {
+    font-size: 15px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  /* Architecture diagram */
+  .arch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    flex: 1;
+  }
+  .arch-box {
+    background: #1e293b;
+    border: 1.5px solid #334155;
+    border-radius: 14px;
+    padding: 20px 22px;
+    width: 210px;
+    text-align: center;
+  }
+  .arch-box.highlight {
+    border-color: #34d399;
+    background: #052e2b;
+  }
+  .arch-box .label { font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .arch-box .detail { font-size: 13px; color: #94a3b8; line-height: 1.4; }
+  .arch-arrow { font-size: 28px; color: #475569; padding: 0 8px; }
+  .arch-col { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+  /* Evidence slide */
+  .evidence-badge {
+    display: inline-block;
+    background: #052e2b;
+    border: 1px solid #34d399;
+    color: #34d399;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+  pre.code {
+    background: #020617;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 14px;
+    color: #86efac;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+  .evidence-facts {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .fact {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex: 1;
+  }
+  .fact .fact-label { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+  .fact .fact-value { font-size: 18px; color: #f8fafc; font-weight: 600; }
+
+  /* Roadmap */
+  .roadmap-row { display: flex; gap: 24px; margin-top: 32px; }
+  .roadmap-item {
+    flex: 1;
+    border-left: 3px solid #34d399;
+    padding-left: 20px;
+  }
+  .roadmap-item h3 { font-size: 19px; color: #f8fafc; margin-bottom: 8px; }
+  .roadmap-item p { font-size: 15px; color: #94a3b8; line-height: 1.5; }
+
+  /* Closing */
+  .closing-links {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .closing-links .link-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 20px;
+  }
+  .closing-links .link-label {
+    color: #34d399;
+    font-weight: 600;
+    width: 160px;
+  }
+  .closing-links .link-value { color: #e2e8f0; font-family: "SF Mono", Consolas, monospace; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<section class="slide title-slide">
+  <div class="logo-mark">C</div>
+  <div class="kicker">AMD Developer Hackathon — Act II · Track 3: Unicorn (Open Innovation)</div>
+  <h1>CarbonPilot</h1>
+  <p class="subtitle">An agentic AI application that analyzes the carbon, energy, and water footprint of AI workloads — and recommends greener GPU and region alternatives, reasoning live on real AMD Instinct compute.</p>
+  <div class="meta-row">
+    <div><strong>Team:</strong> [add team member names]</div>
+    <div><strong>Repo:</strong> github.com/romirbulbule/carbonpilot</div>
+  </div>
+</section>
+
+<!-- Slide 2: Problem -->
+<section class="slide">
+  <div class="kicker">The Problem</div>
+  <h2>AI workloads have a hidden environmental cost — and almost nobody can see it</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>What's missing today</h3>
+      <ul class="plain">
+        <li>Teams choose GPUs and regions based on price and availability — carbon impact is rarely part of the decision</li>
+        <li>Grid carbon intensity varies 15x between regions (26 gCO2/kWh in Norway vs. 380 in Texas) but almost never factors into deployment choices</li>
+        <li>Existing carbon-accounting tools are heavyweight enterprise ESG platforms, not something an ML engineer opens before kicking off a training run</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Why it matters now</h3>
+      <ul class="plain">
+        <li>AI training and inference workloads are growing faster than grid decarbonization</li>
+        <li>GPU choice (AMD Instinct vs. alternatives) and region choice are two of the highest-leverage, lowest-effort levers available — but only if they're visible at decision time</li>
+        <li>A tool that reasons about this in plain language, in real time, closes that visibility gap</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Solution -->
+<section class="slide">
+  <div class="kicker">What We Built</div>
+  <h2>Describe a workload in plain English — get a live, reasoned footprint analysis</h2>
+  <p class="body-text">CarbonPilot takes a free-text description of an AI workload ("fine-tune a 70B model on 8 MI300X GPUs in Virginia for 24 hours"), and an agent parses it, computes energy/carbon/water impact, and reasons about greener GPU and region alternatives — all visible as a live "Thought → Tool Call → Final Answer" trace, not a black box.</p>
+  <div class="card-row">
+    <div class="card">
+      <div class="stat-label">Energy Used</div>
+      <div class="stat">144<span class="stat-unit"> kWh</span></div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Carbon Emissions</div>
+      <div class="stat">64.5<span class="stat-unit"> kg CO2e</span></div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Water Usage</div>
+      <div class="stat">363<span class="stat-unit"> liters</span></div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Greener Alt. Found</div>
+      <div class="stat">97<span class="stat-unit">% savings</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: Architecture -->
+<section class="slide">
+  <div class="kicker">How It Works</div>
+  <h2>Architecture</h2>
+  <div class="arch">
+    <div class="arch-box">
+      <div class="label">React Dashboard</div>
+      <div class="detail">Workload form, live stat tiles, agent trace, carbon-intensity map (d3-geo)</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-col">
+      <div class="arch-box highlight">
+        <div class="label">FastAPI Backend</div>
+        <div class="detail">Calc engine + tool-calling agent orchestration</div>
+      </div>
+      <div class="arch-arrow" style="transform: rotate(90deg);">→</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-col">
+      <div class="arch-box highlight">
+        <div class="label">Fireworks AI</div>
+        <div class="detail">Agent reasoning on AMD-hosted inference (gpt-oss-120b)</div>
+      </div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-col">
+      <div class="arch-box">
+        <div class="label">ElectricityMaps</div>
+        <div class="detail">Live grid carbon intensity by region</div>
+      </div>
+      <div class="arch-box">
+        <div class="label">AMD Instinct MI300X</div>
+        <div class="detail">Real rocm-smi telemetry ingest pipeline</div>
+      </div>
+    </div>
+  </div>
+  <p class="body-text" style="margin-top: 24px; font-size: 16px; color: #94a3b8;">Every LLM call and every failure gracefully degrades — Fireworks → Claude → local regex parser — so the app is always demoable, and every response is tagged with which engine actually produced it.</p>
+</section>
+
+<!-- Slide 5: AMD compute evidence -->
+<section class="slide">
+  <div class="kicker">AMD Compute Usage</div>
+  <div class="evidence-badge">✓ Verified against real AMD Instinct hardware</div>
+  <h2>This isn't a claim — here's the real telemetry</h2>
+  <p class="body-text">We provisioned a real MI300X instance on AMD Developer Cloud, SSH'd in, and ran <code>rocm-smi</code> directly. The readings were pushed through CarbonPilot's own live ingest pipeline — the same code path used in the product — and verified readable back out via the API.</p>
+  <pre class="code">$ ssh root@[mi300x-instance] "rocm-smi --showpower --showuse --showtemp --json"
+
+{
+  "card0": {
+    "Temperature (Sensor junction) (C)": "38.0",
+    "Current Socket Graphics Package Power (W)": "139.0",
+    "GPU use (%)": "0"
+  }
+}</pre>
+  <div class="evidence-facts">
+    <div class="fact">
+      <div class="fact-label">Instance</div>
+      <div class="fact-value">rocm-7-2-4-gpu-mi300x1-192gb-devcloud-atl1</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Agent inference</div>
+      <div class="fact-value">Fireworks AI (gpt-oss-120b)</div>
+    </div>
+    <div class="fact">
+      <div class="fact-label">Full evidence</div>
+      <div class="fact-value">docs/amd-hardware-evidence.md in repo</div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: Roadmap -->
+<section class="slide">
+  <div class="kicker">What's Next</div>
+  <h2>Roadmap beyond the hackathon</h2>
+  <div class="roadmap-row">
+    <div class="roadmap-item">
+      <h3>Carbon-per-token, not carbon-per-GPU-hour</h3>
+      <p>Normalize comparisons by actual compute delivered, not just power draw — a fairer AMD vs. alternative comparison.</p>
+    </div>
+    <div class="roadmap-item">
+      <h3>Rack/server-level oversight (Tier 2)</h3>
+      <p>Real server power via IPMI/Redfish and PDU metering, for teams running their own hardware rather than cloud instances.</p>
+    </div>
+    <div class="roadmap-item">
+      <h3>Cloud provider carbon APIs</h3>
+      <p>AWS/GCP/Azure emissions exports as an additional live data source, account-scoped, for teams already on those platforms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: Closing -->
+<section class="slide title-slide">
+  <div class="kicker">Thank You</div>
+  <h1 style="font-size: 56px;">Try CarbonPilot</h1>
+  <div class="closing-links">
+    <div class="link-row">
+      <span class="link-label">GitHub</span>
+      <span class="link-value">github.com/romirbulbule/carbonpilot</span>
+    </div>
+    <div class="link-row">
+      <span class="link-label">Live demo</span>
+      <span class="link-value">[add hosted URL once deployed]</span>
+    </div>
+    <div class="link-row">
+      <span class="link-label">Team</span>
+      <span class="link-value">[add team member names / contacts]</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
