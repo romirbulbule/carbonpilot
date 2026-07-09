@@ -1,0 +1,8 @@
+{
+  "A100-40GB": { "vendor": "NVIDIA", "tdp_watts": 400, "bf16_tflops": 312 },
+  "A100-80GB": { "vendor": "NVIDIA", "tdp_watts": 400, "bf16_tflops": 312 },
+  "H100-SXM": { "vendor": "NVIDIA", "tdp_watts": 700, "bf16_tflops": 989 },
+  "H100-PCIe": { "vendor": "NVIDIA", "tdp_watts": 350, "bf16_tflops": 756 },
+  "MI250": { "vendor": "AMD", "tdp_watts": 560, "bf16_tflops": 383 },
+  "MI300X": { "vendor": "AMD", "tdp_watts": 750, "bf16_tflops": 1307 }
+}
