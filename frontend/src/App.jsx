@@ -348,7 +348,7 @@ function App() {
             title="Command palette"
           >
             <Command size={14} />
-            <kbd className="text-[10px]">⌘K</kbd>
+            <span className="text-xs">Commands</span>
           </button>
           <button
             onClick={() => setShowOnboarding(true)}
