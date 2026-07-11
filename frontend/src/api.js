@@ -30,3 +30,13 @@ export async function fetchGpus() {
   const res = await fetch(`${API_BASE}/estimate/gpus`)
   return res.json()
 }
+
+export async function generateReport(fields) {
+  const res = await fetch(`${API_BASE}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields),
+  })
+  if (!res.ok) throw new Error(`report failed: ${res.status}`)
+  return res.json()
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { estimateFromText, fetchRegions } from './api'
+import { estimateFromText, fetchRegions, generateReport } from './api'
 import { useLiveStream } from './hooks/useLiveStream'
 import WorkloadForm from './components/WorkloadForm'
 import StatTiles from './components/StatTiles'
@@ -8,6 +8,8 @@ import RegionTable from './components/RegionTable'
 import LiveTicker from './components/LiveTicker'
 import Sparkline from './components/Sparkline'
 import CarbonMap from './components/CarbonMap'
+import OptimizationQueue from './components/OptimizationQueue'
+import OperatorReport from './components/OperatorReport'
 
 function extractResult(trace) {
   const call = [...trace].reverse().find((s) => s.type === 'tool_call' && s.name === 'calculate_footprint')
@@ -20,8 +22,10 @@ function App() {
   const [trace, setTrace] = useState(null)
   const [engine, setEngine] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [report, setReport] = useState(null)
+  const [reportLoading, setReportLoading] = useState(false)
 
-  const { carbonIntensity, powerHistory, connected } = useLiveStream(region)
+  const { carbonIntensity, gpuNodes, powerHistory, connected } = useLiveStream(region)
 
   useEffect(() => {
     fetchRegions().then(setRegions).catch(() => {})
@@ -29,6 +33,7 @@ function App() {
 
   async function handleAnalyze(text) {
     setLoading(true)
+    setReport(null)
     try {
       const data = await estimateFromText(text)
       setTrace(data.trace)
@@ -42,6 +47,26 @@ function App() {
   }
 
   const result = trace ? extractResult(trace) : null
+
+  async function handleGenerateReport() {
+    if (!result) return
+    setReportLoading(true)
+    try {
+      const nodeId = gpuNodes?.[0]?.node_id
+      const data = await generateReport({
+        gpu_type: result.gpu_type,
+        gpu_count: result.gpu_count,
+        hours: result.hours,
+        region: result.region,
+        ...(nodeId ? { node_id: nodeId } : {}),
+      })
+      setReport(data)
+    } catch {
+      setReport(null)
+    } finally {
+      setReportLoading(false)
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -83,6 +108,16 @@ function App() {
           selectedRegion={region}
           onSelectRegion={setRegion}
           liveIntensity={carbonIntensity}
+        />
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <OptimizationQueue scenarios={report?.scenarios} />
+        <OperatorReport
+          report={report}
+          onGenerate={handleGenerateReport}
+          loading={reportLoading}
+          disabled={!result}
         />
       </div>
 
