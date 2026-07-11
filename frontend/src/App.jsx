@@ -14,6 +14,7 @@ import OperatorReport from './components/OperatorReport'
 import TelemetryCharts from './components/TelemetryCharts'
 import RunHistory from './components/RunHistory'
 import RunComparison from './components/RunComparison'
+import EfficiencyGauge from './components/EfficiencyGauge'
 import Tabs from './components/Tabs'
 import { Activity, Radio, TrendingDown, MapPin } from 'lucide-react'
 
@@ -204,6 +205,10 @@ function App() {
 
           <div className="mb-6">
             <StatTiles result={result} />
+          </div>
+
+          <div className="mb-6">
+            <EfficiencyGauge efficiency={report?.efficiency} />
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -60,6 +60,45 @@ def compare_alternatives(gpu_type: str, gpu_count: int, hours: float, region: st
     return candidates[:top_n]
 
 
+def efficiency_score(gpu_type: str, gpu_count: int, hours: float, region: str) -> dict:
+    """Score this (gpu, region) choice 0-100 against every other combo for the
+    same workload size: 100 = the greenest possible combo, 0 = the worst.
+    """
+    all_carbon = []
+    current_carbon = None
+    for alt_gpu in GPU_SPECS:
+        for alt_region in REGIONS:
+            carbon = footprint(alt_gpu, gpu_count, hours, alt_region)["carbon_kg"]
+            all_carbon.append(carbon)
+            if alt_gpu == gpu_type and alt_region == region:
+                current_carbon = carbon
+
+    best = min(all_carbon)
+    worst = max(all_carbon)
+    score = 100.0 if worst == best else 100 * (worst - current_carbon) / (worst - best)
+    score = max(0.0, min(100.0, score))
+
+    if score >= 95:
+        grade = "A+"
+    elif score >= 90:
+        grade = "A"
+    elif score >= 75:
+        grade = "B"
+    elif score >= 60:
+        grade = "C"
+    elif score >= 40:
+        grade = "D"
+    else:
+        grade = "F"
+
+    return {
+        "score": round(score, 1),
+        "grade": grade,
+        "best_carbon_kg": round(best, 2),
+        "worst_carbon_kg": round(worst, 2),
+    }
+
+
 def region_table() -> list[dict]:
     return [
         {"region": key, **{k: v for k, v in val.items() if k != "electricitymaps_zone"}}

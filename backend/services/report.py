@@ -67,6 +67,7 @@ def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_
     result = calc_engine.footprint(gpu_type, gpu_count, hours, region)
     alternatives = calc_engine.compare_alternatives(gpu_type, gpu_count, hours, region)
     scenarios = [_scenario(alt) for alt in alternatives]
+    efficiency = calc_engine.efficiency_score(gpu_type, gpu_count, hours, region)
     telemetry_note = _telemetry_note(node_id)
     actions = _actions(result, region, scenarios, telemetry_note)
 
@@ -87,4 +88,5 @@ def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_
         "actions": actions,
         "executive_summary": executive_summary,
         "telemetry_note": telemetry_note,
+        "efficiency": efficiency,
     }
