@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import config
-from routers import estimate, ingest, live
+from routers import estimate, ingest, live, report
 
 app = FastAPI(title="CarbonPilot API")
 
@@ -16,6 +16,7 @@ app.add_middleware(
 app.include_router(estimate.router)
 app.include_router(live.router)
 app.include_router(ingest.router)
+app.include_router(report.router)
 
 
 @app.get("/health")
