@@ -56,7 +56,7 @@ export default function AgentTrace({ trace, engine }) {
   const reasoningSteps = trace.filter((s) => s.type === 'thought' || s.type === 'tool_call')
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 p-4 break-words">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-300">CarbonPilot agent analysis</h3>
         <EngineBadge engine={engine} />
@@ -87,8 +87,15 @@ export default function AgentTrace({ trace, engine }) {
               {reasoningSteps.map((step, i) => {
                 if (step.type === 'tool_call') {
                   return (
-                    <div key={i} className="rounded-lg bg-slate-800/50 p-2 font-mono text-slate-400">
-                      <span className="text-sky-400">{step.name}</span>({JSON.stringify(step.input)})
+                    <div key={i} className="rounded-lg bg-slate-800/50 p-2">
+                      <div className="font-mono text-sky-400">{step.name}</div>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11px] text-slate-500">
+                        {Object.entries(step.input).map(([key, value]) => (
+                          <span key={key}>
+                            {key}=<span className="text-slate-300">{String(value)}</span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )
                 }
