@@ -1,7 +1,7 @@
 // Single switch to show/hide the marketing demo-video tab without
 // touching any other code. Flip to false (or delete the "video" tab
 // block in App.jsx entirely) to remove it.
-export const SHOW_VIDEO_TAB = true
+export const SHOW_VIDEO_TAB = false
 
 // Set VITE_DEMO_VIDEO_URL once the demo video is hosted somewhere
 // (YouTube/Vimeo watch link, or a direct .mp4 URL). Until then the
