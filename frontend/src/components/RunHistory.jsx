@@ -7,19 +7,26 @@ const ENGINE_DOT = {
   fallback: 'bg-amber-400',
 }
 
-export default function RunHistory({ runs, onSelect }) {
+export default function RunHistory({ runs, onSelect, onClear }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <History size={16} className="text-emerald-400" />
-        <div>
-          <h2 className="text-sm font-medium text-slate-200">Run history</h2>
-          <p className="text-xs text-slate-500">Compare recent scenarios — click one to reload it</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <History size={16} className="text-emerald-400" />
+          <div>
+            <h2 className="text-sm font-medium text-slate-200">Run history</h2>
+            <p className="text-xs text-slate-500">Saved across reloads — click one to reload it</p>
+          </div>
         </div>
+        {runs.length > 0 && (
+          <button onClick={onClear} className="text-xs text-slate-600 hover:text-slate-400">
+            Clear
+          </button>
+        )}
       </div>
 
       {!runs.length && (
-        <p className="text-sm text-slate-600">Runs from this session will appear here.</p>
+        <p className="text-sm text-slate-600">Runs you generate will appear here and persist across reloads.</p>
       )}
 
       <div className="space-y-1.5">

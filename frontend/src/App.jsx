@@ -28,6 +28,18 @@ function extractResult(trace) {
   return call?.result ?? null
 }
 
+const RUNS_STORAGE_KEY = 'carbonpilot_runs'
+
+function loadStoredRuns() {
+  try {
+    const raw = localStorage.getItem(RUNS_STORAGE_KEY)
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 function App() {
   const [region, setRegion] = useState('virginia')
   const [regions, setRegions] = useState([])
@@ -39,13 +51,21 @@ function App() {
   const [directResult, setDirectResult] = useState(null)
   const [manualLoading, setManualLoading] = useState(false)
   const [tab, setTab] = useState('analyze')
-  const [runs, setRuns] = useState([])
+  const [runs, setRuns] = useState(loadStoredRuns)
 
   const { carbonIntensity, gpuNodes, powerHistory, connected } = useLiveStream(region)
 
   useEffect(() => {
     fetchRegions().then(setRegions).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(RUNS_STORAGE_KEY, JSON.stringify(runs))
+    } catch {
+      // storage full or unavailable (private browsing) - history just won't persist
+    }
+  }, [runs])
 
   function recordRun({ engineUsed, trace: runTrace, result: runResult, report: runReport }) {
     if (!runResult) return
@@ -173,7 +193,7 @@ function App() {
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <AgentTrace trace={trace} engine={engine} />
-            <RunHistory runs={runs} onSelect={loadRun} />
+            <RunHistory runs={runs} onSelect={loadRun} onClear={() => setRuns([])} />
           </div>
         </>
       )}
