@@ -15,7 +15,9 @@ import TelemetryCharts from './components/TelemetryCharts'
 import RunHistory from './components/RunHistory'
 import RunComparison from './components/RunComparison'
 import EfficiencyGauge from './components/EfficiencyGauge'
+import ImpactEquivalents from './components/ImpactEquivalents'
 import Tabs from './components/Tabs'
+import { motion, AnimatePresence } from 'motion/react'
 import { Activity, Radio, TrendingDown, MapPin } from 'lucide-react'
 
 const TABS = [
@@ -196,78 +198,92 @@ function App() {
 
       <Tabs tabs={TABS} active={tab} onChange={setTab} />
 
-      {tab === 'analyze' && (
-        <>
-          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <WorkloadForm onSubmit={handleAnalyze} loading={loading} />
-            <ScenarioForm regions={regions} onSubmit={handleManualAnalyze} loading={manualLoading} />
-          </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          {tab === 'analyze' && (
+            <>
+              <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                <WorkloadForm onSubmit={handleAnalyze} loading={loading} />
+                <ScenarioForm regions={regions} onSubmit={handleManualAnalyze} loading={manualLoading} />
+              </div>
 
-          <div className="mb-6">
-            <StatTiles result={result} />
-          </div>
+              <div className="mb-6">
+                <StatTiles result={result} />
+              </div>
 
-          <div className="mb-6">
-            <EfficiencyGauge efficiency={report?.efficiency} />
-          </div>
+              <div className="mb-6">
+                <ImpactEquivalents result={result} />
+              </div>
 
-          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <AgentTrace trace={trace} engine={engine} />
-            <RunHistory
-              runs={runs}
-              onSelect={loadRun}
-              onClear={clearRuns}
-              compareIds={compareIds}
-              onToggleCompare={toggleCompare}
-            />
-          </div>
+              <div className="mb-6">
+                <EfficiencyGauge efficiency={report?.efficiency} />
+              </div>
 
-          {compareIds.length === 2 && (
-            <RunComparison
-              runA={runs.find((r) => r.id === compareIds[0])}
-              runB={runs.find((r) => r.id === compareIds[1])}
-              onClear={() => setCompareIds([])}
-            />
+              <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                <AgentTrace trace={trace} engine={engine} />
+                <RunHistory
+                  runs={runs}
+                  onSelect={loadRun}
+                  onClear={clearRuns}
+                  compareIds={compareIds}
+                  onToggleCompare={toggleCompare}
+                />
+              </div>
+
+              {compareIds.length === 2 && (
+                <RunComparison
+                  runA={runs.find((r) => r.id === compareIds[0])}
+                  runB={runs.find((r) => r.id === compareIds[1])}
+                  onClear={() => setCompareIds([])}
+                />
+              )}
+            </>
           )}
-        </>
-      )}
 
-      {tab === 'live' && (
-        <>
-          <div className="mb-6">
-            <LiveTicker
-              carbonIntensity={carbonIntensity}
-              connected={connected}
-              powerSpark={<Sparkline points={powerHistory} />}
-            />
-          </div>
+          {tab === 'live' && (
+            <>
+              <div className="mb-6">
+                <LiveTicker
+                  carbonIntensity={carbonIntensity}
+                  connected={connected}
+                  powerSpark={<Sparkline points={powerHistory} />}
+                />
+              </div>
 
-          <div className="mb-6">
-            <TelemetryCharts gpuNodes={gpuNodes} />
-          </div>
+              <div className="mb-6">
+                <TelemetryCharts gpuNodes={gpuNodes} />
+              </div>
 
-          <CarbonMap
-            regions={regions}
-            selectedRegion={region}
-            onSelectRegion={setRegion}
-            liveIntensity={carbonIntensity}
-          />
-        </>
-      )}
+              <CarbonMap
+                regions={regions}
+                selectedRegion={region}
+                onSelectRegion={setRegion}
+                liveIntensity={carbonIntensity}
+              />
+            </>
+          )}
 
-      {tab === 'optimization' && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <OptimizationQueue scenarios={report?.scenarios} />
-          <OperatorReport
-            report={report}
-            onGenerate={handleGenerateReport}
-            loading={reportLoading}
-            disabled={!result}
-          />
-        </div>
-      )}
+          {tab === 'optimization' && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <OptimizationQueue scenarios={report?.scenarios} />
+              <OperatorReport
+                report={report}
+                onGenerate={handleGenerateReport}
+                loading={reportLoading}
+                disabled={!result}
+              />
+            </div>
+          )}
 
-      {tab === 'regions' && <RegionTable regions={regions} />}
+          {tab === 'regions' && <RegionTable regions={regions} />}
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }

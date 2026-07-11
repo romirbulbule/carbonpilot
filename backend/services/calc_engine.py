@@ -7,6 +7,19 @@ REGIONS = json.loads((DATA_DIR / "regions.json").read_text())
 
 KG_CO2_PER_TREE_PER_YEAR = 21.0
 
+# EPA-published averages (kg CO2 per unit), used for the real-world impact equivalents.
+KG_CO2_PER_MILE_DRIVEN = 0.404
+KG_CO2_PER_SMARTPHONE_CHARGE = 0.00822
+KG_CO2_PER_GALLON_GASOLINE = 8.887
+
+
+def impact_equivalents(carbon_kg: float) -> dict:
+    return {
+        "miles_driven": round(carbon_kg / KG_CO2_PER_MILE_DRIVEN, 1),
+        "phones_charged": round(carbon_kg / KG_CO2_PER_SMARTPHONE_CHARGE),
+        "gasoline_gallons": round(carbon_kg / KG_CO2_PER_GALLON_GASOLINE, 1),
+    }
+
 
 def footprint(gpu_type: str, gpu_count: int, hours: float, region: str,
               carbon_intensity_g: float | None = None) -> dict:
@@ -37,6 +50,7 @@ def footprint(gpu_type: str, gpu_count: int, hours: float, region: str,
         "water_l": round(water_l, 1),
         "trees_per_year": round(trees_per_year, 2),
         "cost_usd": round(cost_usd, 2),
+        "equivalents": impact_equivalents(carbon_kg),
     }
 
 
