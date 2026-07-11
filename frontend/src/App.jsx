@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { estimateFromText, fetchRegions, generateReport } from './api'
 import { useLiveStream } from './hooks/useLiveStream'
 import WorkloadForm from './components/WorkloadForm'
 import ScenarioForm from './components/ScenarioForm'
 import StatTiles from './components/StatTiles'
-import AgentTrace from './components/AgentTrace'
 import RegionTable from './components/RegionTable'
 import LiveTicker from './components/LiveTicker'
 import Sparkline from './components/Sparkline'
-import CarbonMap from './components/CarbonMap'
 import OptimizationQueue from './components/OptimizationQueue'
 import OperatorReport from './components/OperatorReport'
 import TelemetryCharts from './components/TelemetryCharts'
@@ -18,8 +16,19 @@ import EfficiencyGauge from './components/EfficiencyGauge'
 import ImpactEquivalents from './components/ImpactEquivalents'
 import Tabs from './components/Tabs'
 import CommandPalette from './components/CommandPalette'
+import OnboardingTour from './components/OnboardingTour'
 import { motion, AnimatePresence } from 'motion/react'
-import { Activity, Radio, TrendingDown, MapPin, Link2, Play, Square, Trash2, Command } from 'lucide-react'
+import { Activity, Radio, TrendingDown, MapPin, Link2, Play, Square, Trash2, Command, HelpCircle } from 'lucide-react'
+
+// Deferred: these pull in d3-geo/topojson-client/world-atlas and
+// react-markdown/remark-gfm respectively - split out of the main
+// bundle since they're each only needed once a specific tab is open.
+const CarbonMap = lazy(() => import('./components/CarbonMap'))
+const AgentTrace = lazy(() => import('./components/AgentTrace'))
+
+function PanelSkeleton({ height = 'h-64' }) {
+  return <div className={`animate-pulse rounded-xl border border-slate-800 bg-slate-900/40 ${height}`} />
+}
 
 const TABS = [
   { id: 'analyze', label: 'Analyze', icon: Activity },
@@ -67,7 +76,17 @@ function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [demoStep, setDemoStep] = useState(null)
   const [linkCopied, setLinkCopied] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('carbonpilot_onboarded'))
   const demoStopRef = useRef(false)
+
+  function dismissOnboarding() {
+    try {
+      localStorage.setItem('carbonpilot_onboarded', '1')
+    } catch {
+      // storage unavailable - tour will just show again next visit
+    }
+    setShowOnboarding(false)
+  }
 
   const { carbonIntensity, gpuNodes, powerHistory, connected } = useLiveStream(region)
 
@@ -271,6 +290,7 @@ function App() {
     { id: 'run-demo', label: 'Run demo mode', icon: Play, run: runDemo },
     { id: 'copy-link', label: 'Copy shareable link', icon: Link2, run: copyShareLink },
     { id: 'clear-history', label: 'Clear run history', icon: Trash2, run: clearRuns },
+    { id: 'show-tour', label: 'Show onboarding tour', icon: HelpCircle, run: () => setShowOnboarding(true) },
   ]
 
   return (
@@ -315,6 +335,13 @@ function App() {
             <Command size={14} />
             <kbd className="text-[10px]">⌘K</kbd>
           </button>
+          <button
+            onClick={() => setShowOnboarding(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-sm text-slate-400 hover:border-emerald-500"
+            title="Show the quick tour"
+          >
+            <HelpCircle size={14} />
+          </button>
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
@@ -335,6 +362,8 @@ function App() {
       )}
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} actions={paletteActions} />
+
+      {showOnboarding && <OnboardingTour onDone={dismissOnboarding} />}
 
       <Tabs tabs={TABS} active={tab} onChange={setTab} />
 
@@ -366,7 +395,9 @@ function App() {
               </div>
 
               <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                <AgentTrace trace={trace} engine={engine} />
+                <Suspense fallback={<PanelSkeleton />}>
+                  <AgentTrace trace={trace} engine={engine} />
+                </Suspense>
                 <RunHistory
                   runs={runs}
                   onSelect={loadRun}
@@ -400,12 +431,14 @@ function App() {
                 <TelemetryCharts gpuNodes={gpuNodes} />
               </div>
 
-              <CarbonMap
-                regions={regions}
-                selectedRegion={region}
-                onSelectRegion={setRegion}
-                liveIntensity={carbonIntensity}
-              />
+              <Suspense fallback={<PanelSkeleton height="h-96" />}>
+                <CarbonMap
+                  regions={regions}
+                  selectedRegion={region}
+                  onSelectRegion={setRegion}
+                  liveIntensity={carbonIntensity}
+                />
+              </Suspense>
             </>
           )}
 
