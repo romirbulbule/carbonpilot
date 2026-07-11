@@ -12,6 +12,16 @@ import CarbonMap from './components/CarbonMap'
 import OptimizationQueue from './components/OptimizationQueue'
 import OperatorReport from './components/OperatorReport'
 import TelemetryCharts from './components/TelemetryCharts'
+import RunHistory from './components/RunHistory'
+import Tabs from './components/Tabs'
+import { Activity, Radio, TrendingDown, MapPin } from 'lucide-react'
+
+const TABS = [
+  { id: 'analyze', label: 'Analyze', icon: Activity },
+  { id: 'live', label: 'Live Ops', icon: Radio },
+  { id: 'optimization', label: 'Optimization', icon: TrendingDown },
+  { id: 'regions', label: 'Regions', icon: MapPin },
+]
 
 function extractResult(trace) {
   const call = [...trace].reverse().find((s) => s.type === 'tool_call' && s.name === 'calculate_footprint')
@@ -28,12 +38,38 @@ function App() {
   const [reportLoading, setReportLoading] = useState(false)
   const [directResult, setDirectResult] = useState(null)
   const [manualLoading, setManualLoading] = useState(false)
+  const [tab, setTab] = useState('analyze')
+  const [runs, setRuns] = useState([])
 
   const { carbonIntensity, gpuNodes, powerHistory, connected } = useLiveStream(region)
 
   useEffect(() => {
     fetchRegions().then(setRegions).catch(() => {})
   }, [])
+
+  function recordRun({ engineUsed, trace: runTrace, result: runResult, report: runReport }) {
+    if (!runResult) return
+    const regionLabel = regions.find((r) => r.region === runResult.region)?.label ?? runResult.region
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: Date.now(),
+      label: `${runResult.gpu_count}x ${runResult.gpu_type} · ${regionLabel}`,
+      carbonKg: runResult.carbon_kg,
+      engine: engineUsed,
+      trace: runTrace,
+      directResult: runResult,
+      report: runReport,
+    }
+    setRuns((prev) => [entry, ...prev].slice(0, 10))
+  }
+
+  function loadRun(entry) {
+    setTrace(entry.trace)
+    setEngine(entry.engine)
+    setDirectResult(entry.directResult)
+    setReport(entry.report)
+    setTab('analyze')
+  }
 
   async function fetchReport(fields) {
     setReportLoading(true)
@@ -60,12 +96,13 @@ function App() {
       setEngine(data.engine ?? null)
       const parsed = extractResult(data.trace)
       if (parsed) {
-        await fetchReport({
+        const reportData = await fetchReport({
           gpu_type: parsed.gpu_type,
           gpu_count: parsed.gpu_count,
           hours: parsed.hours,
           region: parsed.region,
         })
+        recordRun({ engineUsed: data.engine ?? null, trace: data.trace, result: parsed, report: reportData })
       }
     } catch (err) {
       setTrace([{ type: 'final_answer', text: `Error: ${err.message}. Is the backend running on :8000?` }])
@@ -80,9 +117,11 @@ function App() {
     try {
       const data = await fetchReport(fields)
       if (data) {
+        const manualTrace = [{ type: 'final_answer', text: data.executive_summary }]
         setDirectResult(data.baseline)
-        setTrace([{ type: 'final_answer', text: data.executive_summary }])
+        setTrace(manualTrace)
         setEngine('manual')
+        recordRun({ engineUsed: 'manual', trace: manualTrace, result: data.baseline, report: data })
       }
     } finally {
       setManualLoading(false)
@@ -119,50 +158,62 @@ function App() {
         </select>
       </header>
 
-      <div className="mb-6">
-        <LiveTicker
-          carbonIntensity={carbonIntensity}
-          connected={connected}
-          powerSpark={<Sparkline points={powerHistory} />}
-        />
-      </div>
+      <Tabs tabs={TABS} active={tab} onChange={setTab} />
 
-      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <WorkloadForm onSubmit={handleAnalyze} loading={loading} />
-        <ScenarioForm regions={regions} onSubmit={handleManualAnalyze} loading={manualLoading} />
-      </div>
+      {tab === 'analyze' && (
+        <>
+          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <WorkloadForm onSubmit={handleAnalyze} loading={loading} />
+            <ScenarioForm regions={regions} onSubmit={handleManualAnalyze} loading={manualLoading} />
+          </div>
 
-      <div className="mb-6">
-        <StatTiles result={result} />
-      </div>
+          <div className="mb-6">
+            <StatTiles result={result} />
+          </div>
 
-      <div className="mb-6">
-        <TelemetryCharts nodeId={gpuNodes?.[0]?.node_id} />
-      </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <AgentTrace trace={trace} engine={engine} />
+            <RunHistory runs={runs} onSelect={loadRun} />
+          </div>
+        </>
+      )}
 
-      <div className="mb-6">
-        <CarbonMap
-          regions={regions}
-          selectedRegion={region}
-          onSelectRegion={setRegion}
-          liveIntensity={carbonIntensity}
-        />
-      </div>
+      {tab === 'live' && (
+        <>
+          <div className="mb-6">
+            <LiveTicker
+              carbonIntensity={carbonIntensity}
+              connected={connected}
+              powerSpark={<Sparkline points={powerHistory} />}
+            />
+          </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <OptimizationQueue scenarios={report?.scenarios} />
-        <OperatorReport
-          report={report}
-          onGenerate={handleGenerateReport}
-          loading={reportLoading}
-          disabled={!result}
-        />
-      </div>
+          <div className="mb-6">
+            <TelemetryCharts nodeId={gpuNodes?.[0]?.node_id} />
+          </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <AgentTrace trace={trace} engine={engine} />
-        <RegionTable regions={regions} />
-      </div>
+          <CarbonMap
+            regions={regions}
+            selectedRegion={region}
+            onSelectRegion={setRegion}
+            liveIntensity={carbonIntensity}
+          />
+        </>
+      )}
+
+      {tab === 'optimization' && (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <OptimizationQueue scenarios={report?.scenarios} />
+          <OperatorReport
+            report={report}
+            onGenerate={handleGenerateReport}
+            loading={reportLoading}
+            disabled={!result}
+          />
+        </div>
+      )}
+
+      {tab === 'regions' && <RegionTable regions={regions} />}
     </div>
   )
 }
