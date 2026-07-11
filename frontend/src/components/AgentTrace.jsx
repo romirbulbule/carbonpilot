@@ -1,7 +1,30 @@
+import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+
 const ENGINE_LABELS = {
   fireworks: 'Fireworks · AMD MI300X',
   claude: 'Claude',
   fallback: 'Fallback parser',
+}
+
+const MARKDOWN_COMPONENTS = {
+  p: (props) => <p className="mb-2 leading-relaxed text-slate-200" {...props} />,
+  strong: (props) => <strong className="font-semibold text-emerald-300" {...props} />,
+  ul: (props) => <ul className="mb-2 list-disc space-y-1 pl-5 text-slate-300" {...props} />,
+  li: (props) => <li {...props} />,
+  h1: (props) => <h4 className="mb-1 mt-3 font-semibold text-slate-100" {...props} />,
+  h2: (props) => <h4 className="mb-1 mt-3 font-semibold text-slate-100" {...props} />,
+  h3: (props) => <h4 className="mb-1 mt-3 font-semibold text-slate-100" {...props} />,
+  table: (props) => (
+    <div className="mb-2 overflow-x-auto rounded-lg border border-slate-800">
+      <table className="w-full text-left text-xs" {...props} />
+    </div>
+  ),
+  thead: (props) => <thead className="bg-slate-800/60 text-slate-400" {...props} />,
+  th: (props) => <th className="px-2 py-1.5 font-medium" {...props} />,
+  td: (props) => <td className="border-t border-slate-800 px-2 py-1.5 text-slate-300" {...props} />,
 }
 
 function EngineBadge({ engine }) {
@@ -19,6 +42,8 @@ function EngineBadge({ engine }) {
 }
 
 export default function AgentTrace({ trace, engine }) {
+  const [showReasoning, setShowReasoning] = useState(false)
+
   if (!trace) {
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-600">
@@ -27,36 +52,58 @@ export default function AgentTrace({ trace, engine }) {
     )
   }
 
+  const finalAnswer = [...trace].reverse().find((s) => s.type === 'final_answer')
+  const reasoningSteps = trace.filter((s) => s.type === 'thought' || s.type === 'tool_call')
+
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-300">CarbonPilot agent analysis</h3>
         <EngineBadge engine={engine} />
       </div>
-      <div className="space-y-2 text-sm">
-        {trace.map((step, i) => {
-          if (step.type === 'thought') {
-            return (
-              <p key={i} className="text-slate-400">
-                <span className="text-slate-600">Thought: </span>
-                {step.text}
-              </p>
-            )
-          }
-          if (step.type === 'tool_call') {
-            return (
-              <div key={i} className="rounded-lg bg-slate-800/50 p-2 font-mono text-xs text-slate-400">
-                <span className="text-sky-400">{step.name}</span>({JSON.stringify(step.input)})
-              </div>
-            )
-          }
-          return (
-            <p key={i} className="font-medium text-emerald-300">
-              {step.text}
-            </p>
-          )
-        })}
-      </div>
+
+      {finalAnswer ? (
+        <div className="text-sm">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+            {finalAnswer.text}
+          </ReactMarkdown>
+        </div>
+      ) : (
+        <p className="text-sm text-slate-500">Reasoning in progress…</p>
+      )}
+
+      {reasoningSteps.length > 0 && (
+        <div className="mt-3 border-t border-slate-800 pt-2">
+          <button
+            onClick={() => setShowReasoning((v) => !v)}
+            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-300"
+          >
+            {showReasoning ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {showReasoning ? 'Hide reasoning' : 'Show reasoning'}
+          </button>
+
+          {showReasoning && (
+            <div className="mt-2 space-y-2 text-xs">
+              {reasoningSteps.map((step, i) => {
+                if (step.type === 'tool_call') {
+                  return (
+                    <div key={i} className="rounded-lg bg-slate-800/50 p-2 font-mono text-slate-400">
+                      <span className="text-sky-400">{step.name}</span>({JSON.stringify(step.input)})
+                    </div>
+                  )
+                }
+                return (
+                  <div key={i} className="text-slate-500">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+                      {step.text}
+                    </ReactMarkdown>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

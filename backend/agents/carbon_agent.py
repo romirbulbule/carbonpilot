@@ -51,8 +51,13 @@ Known regions: {", ".join(calc_engine.REGIONS.keys())}
 
 Given a natural-language workload description, extract gpu_type, gpu_count, hours, and \
 region (default region to "virginia" if not mentioned), call calculate_footprint, then \
-call compare_alternatives, then give a short final recommendation highlighting the \
-greenest alternative and the percent carbon savings. Think step by step before each tool call."""
+call compare_alternatives.
+
+The dashboard already displays the full numeric breakdown and a ranked list of \
+alternatives elsewhere on the page, so your final answer must NOT repeat that as a table \
+or a long list. Instead write a short, conclusive final answer: 2-3 plain sentences \
+naming the single greenest alternative, its percent carbon savings, and one concrete \
+reason to make the switch. No markdown tables, no headers, minimal bold."""
 
 
 def _run_tool(name: str, tool_input: dict) -> dict:
@@ -106,12 +111,12 @@ def analyze_with_fireworks(workload_text: str) -> dict:
         )
         message = response.choices[0].message
 
-        if message.content:
-            trace.append({"type": "thought", "text": message.content})
-
         if not message.tool_calls:
             trace.append({"type": "final_answer", "text": message.content or ""})
             return {"trace": trace, "raw_messages": None, "engine": "fireworks", "model": model}
+
+        if message.content:
+            trace.append({"type": "thought", "text": message.content})
 
         messages.append({
             "role": "assistant",
@@ -149,14 +154,14 @@ def analyze_with_claude(workload_text: str) -> dict:
             messages=messages,
         )
 
-        for block in response.content:
-            if block.type == "text" and block.text.strip():
-                trace.append({"type": "thought", "text": block.text})
-
         if response.stop_reason != "tool_use":
             final_text = "".join(b.text for b in response.content if b.type == "text")
             trace.append({"type": "final_answer", "text": final_text})
             return {"trace": trace, "raw_messages": None, "engine": "claude", "model": "claude-sonnet-5"}
+
+        for block in response.content:
+            if block.type == "text" and block.text.strip():
+                trace.append({"type": "thought", "text": block.text})
 
         messages.append({"role": "assistant", "content": response.content})
         tool_results = []
