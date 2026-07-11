@@ -9,6 +9,7 @@ export default function RegionTable({ regions }) {
           <tr className="text-xs uppercase text-slate-500">
             <th className="pb-2">Region</th>
             <th className="pb-2">gCO2/kWh</th>
+            <th className="pb-2">$/kWh</th>
             <th className="pb-2">Rating</th>
           </tr>
         </thead>
@@ -19,6 +20,7 @@ export default function RegionTable({ regions }) {
               <tr key={r.region} className="border-t border-slate-800/60">
                 <td className="py-1.5">{r.label}</td>
                 <td className="py-1.5">{r.carbon_intensity_g}</td>
+                <td className="py-1.5 text-slate-400">${r.electricity_price_usd_per_kwh?.toFixed(2)}</td>
                 <td className={`py-1.5 font-medium ${lvl.color}`}>{lvl.label}</td>
               </tr>
             )

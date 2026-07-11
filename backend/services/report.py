@@ -15,6 +15,7 @@ def _scenario(alt: dict) -> dict:
         ),
         "carbon_savings_kg": alt["carbon_savings_kg"],
         "carbon_savings_pct": alt["carbon_savings_pct"],
+        "cost_savings_usd": alt["cost_savings_usd"],
     }
 
 
@@ -36,9 +37,10 @@ def _actions(result: dict, region: str, scenarios: list[dict], telemetry_note: s
 
     if scenarios and scenarios[0]["carbon_savings_pct"] > 0:
         best = scenarios[0]
+        cost_note = f" and ${best['cost_savings_usd']} in electricity costs" if best["cost_savings_usd"] > 0 else ""
         actions.append(
             f"{best['title']} first — modeled at {best['carbon_savings_pct']}% lower carbon "
-            f"({best['carbon_savings_kg']} kg CO2e/mo saved)."
+            f"({best['carbon_savings_kg']} kg CO2e/mo saved{cost_note})."
         )
 
     if calc_engine.REGIONS[region]["carbon_intensity_g"] > 300:
@@ -73,8 +75,9 @@ def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_
 
     executive_summary = (
         f"Running {gpu_count}x {gpu_type} in {calc_engine.REGIONS[region]['label']} for {hours} hours "
-        f"consumes {result['energy_kwh']} kWh, emits {result['carbon_kg']} kg CO2e, and uses "
-        f"{result['water_l']} L of water.{telemetry_line}{best_line}"
+        f"consumes {result['energy_kwh']} kWh, emits {result['carbon_kg']} kg CO2e, uses "
+        f"{result['water_l']} L of water, and costs an estimated ${result['cost_usd']} in electricity."
+        f"{telemetry_line}{best_line}"
     )
 
     return {

@@ -5,6 +5,7 @@ const METRICS = [
   { key: 'carbon_kg', label: 'Carbon', unit: 'kg CO2e' },
   { key: 'water_l', label: 'Water', unit: 'L' },
   { key: 'trees_per_year', label: 'Trees/yr to offset', unit: '' },
+  { key: 'cost_usd', label: 'Est. electricity cost', unit: 'USD' },
 ]
 
 function DeltaBadge({ a, b }) {

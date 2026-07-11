@@ -30,7 +30,10 @@ export default function OptimizationQueue({ scenarios }) {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-slate-100">{scenario.title}</p>
-              <p className="text-xs text-slate-500">{scenario.carbon_savings_kg} kg CO2e saved</p>
+              <p className="text-xs text-slate-500">
+                {scenario.carbon_savings_kg} kg CO2e saved
+                {scenario.cost_savings_usd > 0 && <> · ${scenario.cost_savings_usd} saved</>}
+              </p>
             </div>
             <span className="shrink-0 text-sm font-semibold text-emerald-400">
               {scenario.carbon_savings_pct}%

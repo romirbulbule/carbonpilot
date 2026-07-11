@@ -1,4 +1,4 @@
-import { Zap, Leaf, Droplets, TreePine } from 'lucide-react'
+import { Zap, Leaf, Droplets, TreePine, DollarSign } from 'lucide-react'
 
 function Tile({ label, value, unit, source, icon: Icon }) {
   return (
@@ -30,8 +30,8 @@ function Tile({ label, value, unit, source, icon: Icon }) {
 export default function StatTiles({ result }) {
   if (!result) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {['Energy', 'Carbon', 'Water', 'Trees/yr'].map((label) => (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {['Energy', 'Carbon', 'Water', 'Trees/yr', 'Est. cost'].map((label) => (
           <div key={label} className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 text-slate-600">
             <span className="text-xs uppercase tracking-wide">{label}</span>
             <div className="mt-2 text-2xl">—</div>
@@ -42,11 +42,12 @@ export default function StatTiles({ result }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       <Tile label="Energy used" value={result.energy_kwh} unit="kWh" icon={Zap} />
       <Tile label="Carbon emissions" value={result.carbon_kg} unit="kg CO2e" source={result.carbon_intensity_source} icon={Leaf} />
       <Tile label="Water usage" value={result.water_l} unit="liters" icon={Droplets} />
       <Tile label="Trees to offset" value={result.trees_per_year} unit="trees/yr" icon={TreePine} />
+      <Tile label="Est. electricity cost" value={`$${result.cost_usd}`} unit="" icon={DollarSign} />
     </div>
   )
 }

@@ -23,6 +23,7 @@ def footprint(gpu_type: str, gpu_count: int, hours: float, region: str,
     carbon_kg = energy_kwh * reg["pue"] * intensity_g / 1000
     water_l = energy_kwh * reg["pue"] * reg["wue_l_per_kwh"]
     trees_per_year = carbon_kg / KG_CO2_PER_TREE_PER_YEAR
+    cost_usd = energy_kwh * reg["pue"] * reg["electricity_price_usd_per_kwh"]
 
     return {
         "gpu_type": gpu_type,
@@ -35,6 +36,7 @@ def footprint(gpu_type: str, gpu_count: int, hours: float, region: str,
         "carbon_kg": round(carbon_kg, 2),
         "water_l": round(water_l, 1),
         "trees_per_year": round(trees_per_year, 2),
+        "cost_usd": round(cost_usd, 2),
     }
 
 
@@ -51,6 +53,7 @@ def compare_alternatives(gpu_type: str, gpu_count: int, hours: float, region: st
             result["carbon_savings_pct"] = round(
                 100 * result["carbon_savings_kg"] / current["carbon_kg"], 1
             ) if current["carbon_kg"] else 0.0
+            result["cost_savings_usd"] = round(current["cost_usd"] - result["cost_usd"], 2)
             candidates.append(result)
 
     candidates.sort(key=lambda c: c["carbon_kg"])
