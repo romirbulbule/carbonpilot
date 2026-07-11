@@ -16,13 +16,17 @@ export default function WorkloadForm({ onSubmit, loading }) {
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !loading) onSubmit(text)
+        }}
       />
       <button
         onClick={() => onSubmit(text)}
         disabled={loading}
-        className="mt-3 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
+        className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
       >
         {loading ? 'Analyzing…' : 'Analyze →'}
+        <kbd className="rounded border border-slate-950/30 bg-emerald-600/40 px-1.5 py-0.5 text-[10px] font-normal">⌘⏎</kbd>
       </button>
     </div>
   )
