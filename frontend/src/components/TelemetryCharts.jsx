@@ -105,25 +105,41 @@ export default function TelemetryCharts({ gpuNodes = [] }) {
   }
 
   const recent = history.slice(-30)
-  const isMock = gpuNodes.find((n) => n.node_id === selectedNodeId)?.source === 'mock'
+  const selectedNode = gpuNodes.find((n) => n.node_id === selectedNodeId)
+  const isMock = selectedNode?.source === 'mock'
+  const collectionTool = isMock
+    ? 'gpu_poller.py --mock'
+    : selectedNode?.gpu_type?.startsWith('MI')
+      ? 'rocm-smi'
+      : 'nvidia-smi'
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <Activity size={16} className={isMock ? 'text-amber-400' : 'text-emerald-400'} />
-        <div>
-          <h2 className="text-sm font-medium text-slate-200">
-            Live GPU telemetry {gpuNodes.length > 1 && <span className="text-slate-500">· {gpuNodes.length} nodes</span>}
-          </h2>
-          <p className="text-xs text-slate-500">
-            {selectedNodeId} ·{' '}
-            {isMock ? (
-              <span className="text-amber-400">simulated (--mock)</span>
-            ) : (
-              <span className="text-emerald-400">real hardware readings</span>
-            )}
-          </p>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Activity size={16} className={isMock ? 'text-amber-400' : 'text-emerald-400'} />
+          <div>
+            <h2 className="text-sm font-medium text-slate-200">
+              Live GPU telemetry {gpuNodes.length > 1 && <span className="text-slate-500">· {gpuNodes.length} nodes</span>}
+            </h2>
+            <p className="text-xs text-slate-500">
+              {selectedNodeId} ·{' '}
+              {isMock ? (
+                <span className="text-amber-400">simulated (--mock)</span>
+              ) : (
+                <span className="text-emerald-400">real hardware readings</span>
+              )}
+            </p>
+          </div>
         </div>
+        <span
+          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+            isMock ? 'border-amber-500/30 text-amber-400' : 'border-emerald-500/30 text-emerald-400'
+          }`}
+          title={`Data source for ${selectedNodeId}`}
+        >
+          via {collectionTool}
+        </span>
       </div>
 
       <FleetRow nodes={gpuNodes} selectedNodeId={selectedNodeId} onSelect={setSelectedNodeId} />
