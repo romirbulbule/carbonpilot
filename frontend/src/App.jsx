@@ -189,7 +189,7 @@ function App() {
           </div>
 
           <div className="mb-6">
-            <TelemetryCharts nodeId={gpuNodes?.[0]?.node_id} />
+            <TelemetryCharts gpuNodes={gpuNodes} />
           </div>
 
           <CarbonMap
