@@ -25,6 +25,13 @@ It does **not** connect to real data-center management systems (DCIM,
 PDUs, Redfish/IPMI) — that's a possible Tier 2 stretch goal, not in
 this scaffold.
 
+NVIDIA GPUs (A100, H100) are included alongside AMD (MI250, MI300X) in
+the comparison set on purpose — CarbonPilot's core pitch is showing
+AMD Instinct hardware winning the greener-alternative comparison on
+real numbers, not assuming it. See `docs/amd-hardware-evidence.md` for
+the real AMD MI300X hardware evidence that satisfies this hackathon's
+AMD-compute-usage requirement.
+
 ## Project layout
 
 ```
