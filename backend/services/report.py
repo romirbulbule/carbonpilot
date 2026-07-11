@@ -2,7 +2,7 @@
 scenarios + recommended actions) on top of the existing calc_engine output.
 Optionally folds in live GPU telemetry as hardware-verified evidence.
 """
-from services import calc_engine, gpu_metrics
+from services import calc_engine, electricitymaps, gpu_metrics
 
 
 def _scenario(alt: dict) -> dict:
@@ -19,20 +19,26 @@ def _scenario(alt: dict) -> dict:
     }
 
 
-def _telemetry_note(node_id: str | None) -> str | None:
+def _telemetry_info(node_id: str | None) -> tuple[str | None, bool]:
+    """Returns (note_text, is_mock). Mock readings (gpu_poller.py --mock)
+    are labeled as simulated, never presented as hardware-verified
+    evidence — that distinction matters for the AMD-compute-usage claim."""
     if not node_id:
-        return None
+        return None, False
     readings = gpu_metrics.latest(node_id)
     if not readings:
-        return None
+        return None, False
     reading = readings[0]
-    return (
-        f"Live telemetry from {node_id}: {reading['power_w']}W draw, "
+    is_mock = reading.get("source") == "mock"
+    kind = "Simulated (--mock)" if is_mock else "Live hardware"
+    note = (
+        f"{kind} telemetry from {node_id}: {reading['power_w']}W draw, "
         f"{reading['util_pct']}% utilization, {reading['temp_c']}°C."
     )
+    return note, is_mock
 
 
-def _actions(result: dict, region: str, scenarios: list[dict], telemetry_note: str | None) -> list[str]:
+def _actions(result: dict, region: str, scenarios: list[dict], telemetry_note: str | None, telemetry_is_mock: bool) -> list[str]:
     actions = []
 
     if scenarios and scenarios[0]["carbon_savings_pct"] > 0:
@@ -54,8 +60,10 @@ def _actions(result: dict, region: str, scenarios: list[dict], telemetry_note: s
             "Water usage is material at this scale — consider a lower-WUE region or cooling change."
         )
 
-    if telemetry_note:
+    if telemetry_note and not telemetry_is_mock:
         actions.append("Live GPU telemetry is attached below as hardware-verified evidence, not just a model estimate.")
+    elif telemetry_note and telemetry_is_mock:
+        actions.append("Telemetry shown below is simulated (--mock) — run the poller against real hardware for verifiable evidence.")
 
     if not actions:
         actions.append("Current configuration is already close to optimal among modeled alternatives.")
@@ -63,13 +71,16 @@ def _actions(result: dict, region: str, scenarios: list[dict], telemetry_note: s
     return actions
 
 
-def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_id: str | None = None) -> dict:
-    result = calc_engine.footprint(gpu_type, gpu_count, hours, region)
+async def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_id: str | None = None) -> dict:
+    live = await electricitymaps.get_live_intensity(region)
+    live_intensity_g = live["carbon_intensity_g"] if live["source"] == "live" else None
+
+    result = calc_engine.footprint(gpu_type, gpu_count, hours, region, carbon_intensity_g=live_intensity_g)
     alternatives = calc_engine.compare_alternatives(gpu_type, gpu_count, hours, region)
     scenarios = [_scenario(alt) for alt in alternatives]
     efficiency = calc_engine.efficiency_score(gpu_type, gpu_count, hours, region)
-    telemetry_note = _telemetry_note(node_id)
-    actions = _actions(result, region, scenarios, telemetry_note)
+    telemetry_note, telemetry_is_mock = _telemetry_info(node_id)
+    actions = _actions(result, region, scenarios, telemetry_note, telemetry_is_mock)
 
     best_line = f" The best modeled alternative is {scenarios[0]['title']}." if scenarios else ""
     telemetry_line = f" {telemetry_note}" if telemetry_note else ""
@@ -88,5 +99,6 @@ def build_report(gpu_type: str, gpu_count: int, hours: float, region: str, node_
         "actions": actions,
         "executive_summary": executive_summary,
         "telemetry_note": telemetry_note,
+        "telemetry_is_mock": telemetry_is_mock,
         "efficiency": efficiency,
     }

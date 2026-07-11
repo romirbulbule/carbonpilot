@@ -76,9 +76,17 @@ export default function OperatorReport({ report, onGenerate, loading, disabled }
           <p className="text-sm leading-relaxed text-slate-300">{report.executive_summary}</p>
 
           {report.telemetry_note && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
-              <Zap size={14} className="mt-0.5 shrink-0 text-emerald-400" />
-              <p className="text-xs text-emerald-300">{report.telemetry_note}</p>
+            <div
+              className={`mt-3 flex items-start gap-2 rounded-lg border px-3 py-2 ${
+                report.telemetry_is_mock
+                  ? 'border-amber-500/20 bg-amber-500/5'
+                  : 'border-emerald-500/20 bg-emerald-500/5'
+              }`}
+            >
+              <Zap size={14} className={`mt-0.5 shrink-0 ${report.telemetry_is_mock ? 'text-amber-400' : 'text-emerald-400'}`} />
+              <p className={`text-xs ${report.telemetry_is_mock ? 'text-amber-300' : 'text-emerald-300'}`}>
+                {report.telemetry_note}
+              </p>
             </div>
           )}
 

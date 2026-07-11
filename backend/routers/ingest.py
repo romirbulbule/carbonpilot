@@ -14,6 +14,7 @@ class GpuReading(BaseModel):
     power_w: float
     util_pct: float
     temp_c: float
+    source: str = "real"  # "real" (nvidia-smi/rocm-smi) or "mock" (gpu_poller.py --mock)
 
 
 @router.post("/gpu")
@@ -28,4 +29,5 @@ def ingest_gpu(reading: GpuReading, x_ingest_key: str = Header(default="")):
         util_pct=reading.util_pct,
         temp_c=reading.temp_c,
         gpu_type=reading.gpu_type,
+        source=reading.source,
     )

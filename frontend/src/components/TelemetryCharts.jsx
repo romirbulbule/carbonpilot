@@ -105,16 +105,24 @@ export default function TelemetryCharts({ gpuNodes = [] }) {
   }
 
   const recent = history.slice(-30)
+  const isMock = gpuNodes.find((n) => n.node_id === selectedNodeId)?.source === 'mock'
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <Activity size={16} className="text-emerald-400" />
+        <Activity size={16} className={isMock ? 'text-amber-400' : 'text-emerald-400'} />
         <div>
           <h2 className="text-sm font-medium text-slate-200">
             Live GPU telemetry {gpuNodes.length > 1 && <span className="text-slate-500">· {gpuNodes.length} nodes</span>}
           </h2>
-          <p className="text-xs text-slate-500">{selectedNodeId} · real hardware readings</p>
+          <p className="text-xs text-slate-500">
+            {selectedNodeId} ·{' '}
+            {isMock ? (
+              <span className="text-amber-400">simulated (--mock)</span>
+            ) : (
+              <span className="text-emerald-400">real hardware readings</span>
+            )}
+          </p>
         </div>
       </div>
 

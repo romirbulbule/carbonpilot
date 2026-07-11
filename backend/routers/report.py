@@ -15,5 +15,5 @@ class ReportRequest(BaseModel):
 
 
 @router.post("")
-def generate_report(req: ReportRequest):
-    return report_service.build_report(req.gpu_type, req.gpu_count, req.hours, req.region, req.node_id)
+async def generate_report(req: ReportRequest):
+    return await report_service.build_report(req.gpu_type, req.gpu_count, req.hours, req.region, req.node_id)

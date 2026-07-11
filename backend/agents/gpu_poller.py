@@ -81,7 +81,12 @@ def main():
                 else:
                     reading = poll_amd()
 
-                payload = {"node_id": args.node_id, "gpu_type": args.gpu_type, **reading}
+                payload = {
+                    "node_id": args.node_id,
+                    "gpu_type": args.gpu_type,
+                    "source": "mock" if args.mock else "real",
+                    **reading,
+                }
                 resp = client.post(
                     f"{BACKEND_URL}/ingest/gpu",
                     json=payload,

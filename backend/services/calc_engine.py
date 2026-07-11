@@ -54,15 +54,35 @@ def footprint(gpu_type: str, gpu_count: int, hours: float, region: str,
     }
 
 
+def _equal_work_hours(base_gpu_type: str, alt_gpu_type: str, hours: float) -> float:
+    """Hours the alt GPU needs to complete the same total compute work
+    (approximated via bf16_tflops throughput) that base_gpu_type does in
+    `hours` - so alternatives are compared on equal work done, not just
+    equal wall-clock runtime. A faster GPU finishing the same job sooner
+    gets credit for that; holding hours constant across different GPUs
+    would silently compare unequal amounts of work.
+    """
+    base_tflops = GPU_SPECS[base_gpu_type]["bf16_tflops"]
+    alt_tflops = GPU_SPECS[alt_gpu_type]["bf16_tflops"]
+    return hours * (base_tflops / alt_tflops)
+
+
 def compare_alternatives(gpu_type: str, gpu_count: int, hours: float, region: str, top_n: int = 3) -> list[dict]:
-    """Rank alternative (gpu_type, region) combos by resulting carbon_kg, cheapest-carbon first."""
+    """Rank alternative (gpu_type, region) combos by resulting carbon_kg, cheapest-carbon first.
+
+    Each alternative GPU's hours are scaled to match the amount of work
+    (throughput x time) the original config does, not the original's raw
+    hour count - otherwise a slower GPU pinned to the same hours looks
+    artificially efficient just for doing less total work.
+    """
     current = footprint(gpu_type, gpu_count, hours, region)
     candidates = []
     for alt_gpu in GPU_SPECS:
         for alt_region in REGIONS:
             if alt_gpu == gpu_type and alt_region == region:
                 continue
-            result = footprint(alt_gpu, gpu_count, hours, alt_region)
+            equal_work_hours = _equal_work_hours(gpu_type, alt_gpu, hours)
+            result = footprint(alt_gpu, gpu_count, equal_work_hours, alt_region)
             result["carbon_savings_kg"] = round(current["carbon_kg"] - result["carbon_kg"], 2)
             result["carbon_savings_pct"] = round(
                 100 * result["carbon_savings_kg"] / current["carbon_kg"], 1
@@ -81,8 +101,9 @@ def efficiency_score(gpu_type: str, gpu_count: int, hours: float, region: str) -
     all_carbon = []
     current_carbon = None
     for alt_gpu in GPU_SPECS:
+        equal_work_hours = _equal_work_hours(gpu_type, alt_gpu, hours)
         for alt_region in REGIONS:
-            carbon = footprint(alt_gpu, gpu_count, hours, alt_region)["carbon_kg"]
+            carbon = footprint(alt_gpu, gpu_count, equal_work_hours, alt_region)["carbon_kg"]
             all_carbon.append(carbon)
             if alt_gpu == gpu_type and alt_region == region:
                 current_carbon = carbon
